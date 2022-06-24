@@ -135,7 +135,8 @@ class LogisticRegression:
         - gradient with respect to weights w; an array of same shape as w
         """
         dw = np.zeros_like(self.w)  # initialize the gradient as zero
-        loss = 0
+        loss = 0   # ????? матожидание между y данными и y предсказанным
+        diff = y_batch - self.predict(y_batch)
         # Compute loss and gradient. Your code should not contain python loops.
 
 
