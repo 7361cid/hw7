@@ -96,6 +96,8 @@ class LogisticRegression:
 
         ###########################################################################
         #                           END OF YOUR CODE                              #
+        print(f"LOG predict_proba self.w {self.w.shape} X.shape {X.shape}")
+
         ###########################################################################
         return y_proba
 
@@ -116,7 +118,7 @@ class LogisticRegression:
         # TODO:                                                                   #
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
-        y_proba = self.predict_proba(X, append_bias=True)
+        y_proba = self.predict_proba(X, append_bias=True) # ????? CHANGE
         y_pred = ...
 
         ###########################################################################
