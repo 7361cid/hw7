@@ -28,6 +28,7 @@ class LogisticRegression:
         # Add a column of ones to X for the bias sake.
         X = LogisticRegression.append_biases(X)
         num_train, dim = X.shape
+        print(f"LOG num_train {num_train} dim {dim}")
         if self.w is None:
             # lazily initialize weights
             self.w = np.random.randn(dim) * 0.01
@@ -46,8 +47,11 @@ class LogisticRegression:
             # Hint: Use np.random.choice to generate indices. Sampling with         #
             # replacement is faster than sampling without replacement.              #
             #########################################################################
-
-
+            print(f"LOG TRAIN STEP 1")
+            indexes = np.random.choice(num_train, batch_size)
+            X_batch = X[indexes]
+            y_batch = y[indexes]
+            print(f"LOG X_batch.shape {X_batch.shape} ---- y_batch.shape  {y_batch.shape}")
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
@@ -97,7 +101,9 @@ class LogisticRegression:
         ###########################################################################
         #                           END OF YOUR CODE                              #
         print(f"LOG predict_proba self.w {self.w.shape} X.shape {X.shape}")
-
+        # ????? y_proba это сигмоид от суммы произведений w и X(нужно учитывать Xi возможно форма весов неверна)
+        tmp = self.w[0] + np.sum(self.w[1:] * X)
+        print(f"LOG predict_proba {tmp} {tmp.shape}")
         ###########################################################################
         return y_proba
 
@@ -118,7 +124,7 @@ class LogisticRegression:
         # TODO:                                                                   #
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
-        y_proba = self.predict_proba(X, append_bias=True) # ????? CHANGE
+        y_proba = self.predict_proba(X, append_bias=False)  # ????? CHANGE
         y_pred = ...
 
         ###########################################################################
@@ -138,15 +144,15 @@ class LogisticRegression:
         """
         dw = np.zeros_like(self.w)  # initialize the gradient as zero
         loss = 0   # ????? матожидание между y данными и y предсказанным
-        diff = y_batch - self.predict(y_batch)
         # Compute loss and gradient. Your code should not contain python loops.
-
 
         # Right now the loss is a sum over all training examples, but we want it
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
 
-
+        #  ????? корректировка весов -  w = w - a(a - y)x,  где a = sigmoid(w^T*x)
+        #  ????? Log loss  https://www.helenkapatsa.ru/logharifmichieskaia-potieria/?ysclid=l4xru2cvju431994983
+        loss = y_batch - self.predict(X_batch)
         # Add regularization to the loss and gradient.
         # Note that you have to exclude bias term in regularization.
 
