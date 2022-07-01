@@ -25,7 +25,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, random
 X_train_sample = X_train[:10000]
 y_train_sample = y_train[:10000]
 clf = LogisticRegression()
-clf.w = np.random.randn(X_train_sample.shape[0]+1) * 2
+clf.w = np.random.randn(X_train_sample.shape[1]+1) * 2
 loss, grad = clf.loss(LogisticRegression.append_biases(X_train_sample), y_train_sample, 0.0)
 
 f = lambda w: clf.loss(LogisticRegression.append_biases(X_train_sample), y_train_sample, 0.0)[0]
