@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import sparse
-
+from scipy.special import expit
 
 class LogisticRegression:
     def __init__(self):
@@ -88,6 +88,7 @@ class LogisticRegression:
         - y_proba: Probabilities of classes for the data in X. y_pred is a 2-dimensional
           array with a shape (N, 2), and each row is a distribution of classes [prob_class_0, prob_class_1].
         """
+        print(f"LOG predict_proba X[1].shape {X[1].shape}")
         if append_bias:
             X = LogisticRegression.append_biases(X)
         ###########################################################################
@@ -100,14 +101,14 @@ class LogisticRegression:
 
         ###########################################################################
         #                           END OF YOUR CODE                              #
-        print(f"LOG predict_proba self.w[1:].shape {self.w[1:].shape} X[1].T.shape {X[1].T.shape}")
-        # ????? y_proba это сигмоид от суммы произведений w и X(нужно учитывать Xi возможно форма весов неверна)
+        print(f"LOG predict_proba self.w[1:].shape {self.w[1:].shape} X[1].shape {X[1].shape} X[1].T.shape {X[1].T.shape}")
+        # ????? y_proba это сигмоид (expit) от суммы произведений w и X(нужно учитывать Xi возможно форма весов неверна)
         array_X = X.toarray()
         x1_array = array_X[1]
         print(f"LOG predict_proba  x1_array.shape  {x1_array.shape} \n type {type(x1_array)} \n self.w {self.w.shape} "
               f"\n type {type(self.w)} \n")
-        tmp = self.w + x1_array
-        print(f"LOG predict_proba tmp {tmp} \n tmp.shape {tmp.shape}")
+        tmp3 = expit(self.w[0] + np.sum(self.w[1:] * x1_array))
+        print(f"LOG predict_proba tmp3 {tmp3}  \n tmp3.shape {tmp3.shape}")
         ###########################################################################
         return y_proba
 
@@ -156,7 +157,6 @@ class LogisticRegression:
 
         #  ????? корректировка весов -  w = w - a(a - y)x,  где a = sigmoid(w^T*x)
         #  ????? Log loss  https://www.helenkapatsa.ru/logharifmichieskaia-potieria/?ysclid=l4xru2cvju431994983
-        print(f"LOG call loss {X_batch}  type {type(X_batch)}")
         loss = y_batch - self.predict(X_batch)
         # Add regularization to the loss and gradient.
         # Note that you have to exclude bias term in regularization.
@@ -166,5 +166,4 @@ class LogisticRegression:
 
     @staticmethod
     def append_biases(X):
-        print(f"LOG call append_biases {X}  type {type(X)}")
         return sparse.hstack((X, np.ones(X.shape[0])[:, np.newaxis])).tocsr()
