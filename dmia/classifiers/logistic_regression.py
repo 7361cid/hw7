@@ -75,6 +75,13 @@ class LogisticRegression:
 
         return self
 
+    def calculate_prob(self, Xi):
+        print(f"LOG calculate_prob {Xi} \n {type(Xi)} {Xi.shape}")
+        return expit(self.w[0] + np.sum(self.w[1:] * Xi))
+
+    def calculate_negative_prob(self, prob):
+        return [prob, 1  - prob]
+
     def predict_proba(self, X, append_bias=False):
         """
         Use the trained weights of this linear classifier to predict probabilities for
@@ -109,6 +116,10 @@ class LogisticRegression:
               f"\n type {type(self.w)} \n")
         tmp3 = expit(self.w[0] + np.sum(self.w[1:] * x1_array))
         print(f"LOG predict_proba tmp3 {tmp3}  \n tmp3.shape {tmp3.shape}")
+        probs = list(map(self.calculate_prob, array_X))
+        print(f"LOG predict_proba  probs  {probs} \n type {type(probs)}")
+        y_proba = np.array(list(map(self.calculate_negative_prob, probs)))
+        print(f"LOG predict_proba  y_proba  {y_proba} \n type {type(y_proba)}")
         ###########################################################################
         return y_proba
 
@@ -148,7 +159,7 @@ class LogisticRegression:
         - gradient with respect to weights w; an array of same shape as w
         """
         dw = np.zeros_like(self.w)  # initialize the gradient as zero
-        loss = 0   # ????? матожидание между y данными и y предсказанным
+        loss = 0
         # Compute loss and gradient. Your code should not contain python loops.
 
         # Right now the loss is a sum over all training examples, but we want it
