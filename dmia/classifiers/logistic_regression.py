@@ -155,6 +155,7 @@ class LogisticRegression:
         - loss as single float
         - gradient with respect to weights w; an array of same shape as w
         """
+        # https://ml-cheatsheet-russian.readthedocs.io/ru/latest/linear_regression.html#bias-term TODO
         dw = np.zeros_like(self.w)  # initialize the gradient as zero
         loss = 0
         # Compute loss and gradient. Your code should not contain python loops.
@@ -165,9 +166,7 @@ class LogisticRegression:
 
         #  ????? корректировка весов -  w = w - a(a - y)x,  где a = sigmoid(w^T*x)
         #  ????? Log loss  https://www.helenkapatsa.ru/logharifmichieskaia-potieria/?ysclid=l4xru2cvju431994983
-        print(f"Log loss  \n {y_batch.shape}")
         y_predict = self.predict(X_batch)
-        print(f"Log loss  \n {y_predict.shape}")
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
         # Add regularization to the loss and gradient.
