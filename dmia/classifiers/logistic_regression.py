@@ -76,11 +76,19 @@ class LogisticRegression:
         return self
 
     def calculate_prob(self, Xi):
-        print(f"LOG calculate_prob {Xi} \n {type(Xi)} {Xi.shape}")
         return expit(self.w[0] + np.sum(self.w[1:] * Xi))
 
     def calculate_negative_prob(self, prob):
-        return [prob, 1  - prob]
+        return [prob, 1 - prob]
+
+    def chouse_prob(self, variants):
+        """
+        Должно во3вращать класс или вероятность??????
+        """
+        if variants[0] >= variants[1]:
+            return variants[0]
+        else:
+            return 1 - variants[0]
 
     def predict_proba(self, X, append_bias=False):
         """
@@ -95,7 +103,6 @@ class LogisticRegression:
         - y_proba: Probabilities of classes for the data in X. y_pred is a 2-dimensional
           array with a shape (N, 2), and each row is a distribution of classes [prob_class_0, prob_class_1].
         """
-        print(f"LOG predict_proba X[1].shape {X[1].shape}")
         if append_bias:
             X = LogisticRegression.append_biases(X)
         ###########################################################################
@@ -108,18 +115,9 @@ class LogisticRegression:
 
         ###########################################################################
         #                           END OF YOUR CODE                              #
-        print(f"LOG predict_proba self.w[1:].shape {self.w[1:].shape} X[1].shape {X[1].shape} X[1].T.shape {X[1].T.shape}")
-        # ????? y_proba это сигмоид (expit) от суммы произведений w и X(нужно учитывать Xi возможно форма весов неверна)
         array_X = X.toarray()
-        x1_array = array_X[1]
-        print(f"LOG predict_proba  x1_array.shape  {x1_array.shape} \n type {type(x1_array)} \n self.w {self.w.shape} "
-              f"\n type {type(self.w)} \n")
-        tmp3 = expit(self.w[0] + np.sum(self.w[1:] * x1_array))
-        print(f"LOG predict_proba tmp3 {tmp3}  \n tmp3.shape {tmp3.shape}")
         probs = list(map(self.calculate_prob, array_X))
-        print(f"LOG predict_proba  probs  {probs} \n type {type(probs)}")
         y_proba = np.array(list(map(self.calculate_negative_prob, probs)))
-        print(f"LOG predict_proba  y_proba  {y_proba} \n type {type(y_proba)}")
         ###########################################################################
         return y_proba
 
@@ -141,8 +139,7 @@ class LogisticRegression:
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
         y_proba = self.predict_proba(X, append_bias=False)  # ????? CHANGE
-        y_pred = ...
-
+        y_pred = np.array(list(map(self.chouse_prob, y_proba)))
         ###########################################################################
         #                           END OF YOUR CODE                              #
         ###########################################################################
@@ -168,7 +165,11 @@ class LogisticRegression:
 
         #  ????? корректировка весов -  w = w - a(a - y)x,  где a = sigmoid(w^T*x)
         #  ????? Log loss  https://www.helenkapatsa.ru/logharifmichieskaia-potieria/?ysclid=l4xru2cvju431994983
-        loss = y_batch - self.predict(X_batch)
+        print(f"Log loss  \n {y_batch.shape}")
+        y_predict = self.predict(X_batch)
+        print(f"Log loss  \n {y_predict.shape}")
+        ones = np.array(list(1 for i in range(y_predict.shape[0])))
+        loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
         # Add regularization to the loss and gradient.
         # Note that you have to exclude bias term in regularization.
 
