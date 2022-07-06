@@ -75,7 +75,7 @@ class LogisticRegression:
 
         return self
 
-    def calculate_prob(self, Xi):
+    def calculate_sigmoid(self, Xi):
         return expit(self.w[0] + np.sum(self.w[1:] * Xi))
 
     def calculate_negative_prob(self, prob):
@@ -89,6 +89,12 @@ class LogisticRegression:
             return variants[0]
         else:
             return 1 - variants[0]
+
+    def calculate_dw(self, Xi, Yi):
+        #print(f"Log calculate_dw type y_batch {type(y_batch)}\n "
+        #      f"\n  type y_predict {type(y_predict)}"
+        #      f" type w {type(w)}")
+        return np.sum(Yi - self.calculate_sigmoid(Xi) * Xi)
 
     def predict_proba(self, X, append_bias=False):
         """
@@ -116,7 +122,7 @@ class LogisticRegression:
         ###########################################################################
         #                           END OF YOUR CODE                              #
         array_X = X.toarray()
-        probs = list(map(self.calculate_prob, array_X))
+        probs = list(map(self.calculate_sigmoid, array_X))
         y_proba = np.array(list(map(self.calculate_negative_prob, probs)))
         ###########################################################################
         return y_proba
@@ -155,7 +161,6 @@ class LogisticRegression:
         - loss as single float
         - gradient with respect to weights w; an array of same shape as w
         """
-        # https://ml-cheatsheet-russian.readthedocs.io/ru/latest/linear_regression.html#bias-term TODO
         dw = np.zeros_like(self.w)  # initialize the gradient as zero
         loss = 0
         # Compute loss and gradient. Your code should not contain python loops.
@@ -164,12 +169,13 @@ class LogisticRegression:
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
 
-        #  ????? корректировка весов -  w = w - a(a - y)x,  где a = sigmoid(w^T*x)
-        #  ????? Log loss  https://www.helenkapatsa.ru/logharifmichieskaia-potieria/?ysclid=l4xru2cvju431994983
         y_predict = self.predict(X_batch)
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
         # Add regularization to the loss and gradient.
+
+        print(f"X_batch shape {X_batch.shape} \n y_batch shape {y_batch.shape}")
+        dw = np.array([self.calculate_dw(X_batch, y_batch) for i in range(X_batch.shape[1])])
         # Note that you have to exclude bias term in regularization.
 
 
