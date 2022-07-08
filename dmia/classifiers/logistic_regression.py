@@ -76,7 +76,7 @@ class LogisticRegression:
         return self
 
     def calculate_sigmoid(self, Xi):
-        print(f"Log calculate_sigmoid {Xi.shape} {self.w[1:].shape}")
+       # print(f"Log calculate_sigmoid {Xi.shape} {self.w[1:].shape}")
         return expit(self.w[0] + np.sum(self.w[1:] * Xi))
 
     def calculate_negative_prob(self, prob):
@@ -179,9 +179,15 @@ class LogisticRegression:
         print(f"X_batch.toarray() shape {X_batch.toarray().shape} \n ")
         #dw = np.array([self.calculate_dw(X_batch, y_batch) for i in range(X_batch.shape[1])])
         # https://translated.turbopages.org/proxy_u/en-ru.ru.e4bc73ef-62c716fb-60995054-74722d776562/https/www.baeldung.com/cs/gradient-descent-logistic-regression
-        tmp = y_batch[0] - self.calculate_sigmoid(X_batch[0].toarray()) * X_batch[0].toarray()
+        # TODO убрать циклы
+        X_batch = X_batch.toarray()
+        for j in range(self.w.shape[0]):
+            for i in range(len(y_batch)):
+                dw[j] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j]
+            print(f"Log long cycle iteration j = {j} dw[j] = {dw[j]}")
 
-        print(f"Log loss tmp {tmp}  {type(tmp)} ")
+        print(f"Log loss type dw {type(dw)}  {dw.shape}")
+
         # Note that you have to exclude bias term in regularization.
 
 
