@@ -174,6 +174,7 @@ class LogisticRegression:
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
         # Add regularization to the loss and gradient.
+        # ругуляризация https://craftappmobile.com/l1-%D0%B8-l2-%D1%80%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D0%B4%D0%BB%D1%8F-%D0%BB%D0%BE%D0%B3%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B9-%D1%80/?ysclid=l5cefgf0pn83923261
 
         print(f"X_batch shape {X_batch.shape} \n y_batch shape {y_batch.shape}")
         print(f"X_batch.toarray() shape {X_batch.toarray().shape} \n ")
