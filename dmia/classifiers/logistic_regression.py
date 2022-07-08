@@ -145,7 +145,7 @@ class LogisticRegression:
         # TODO:                                                                   #
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
-        y_proba = self.predict_proba(X, append_bias=False)  # ????? CHANGE
+        y_proba = self.predict_proba(X, append_bias=True)
         y_pred = np.array(list(map(self.chouse_prob, y_proba)))
         ###########################################################################
         #                           END OF YOUR CODE                              #
@@ -169,22 +169,27 @@ class LogisticRegression:
         # Right now the loss is a sum over all training examples, but we want it
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
-
+        print(f"Log Before predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         y_predict = self.predict(X_batch)
+        print(f"Log after predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
         # Add regularization to the loss and gradient.
         # ругуляризация https://craftappmobile.com/l1-%D0%B8-l2-%D1%80%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D0%B4%D0%BB%D1%8F-%D0%BB%D0%BE%D0%B3%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B9-%D1%80/?ysclid=l5cefgf0pn83923261
 
         print(f"X_batch shape {X_batch.shape} \n y_batch shape {y_batch.shape}")
-        print(f"X_batch.toarray() shape {X_batch.toarray().shape} \n ")
         #dw = np.array([self.calculate_dw(X_batch, y_batch) for i in range(X_batch.shape[1])])
         # https://translated.turbopages.org/proxy_u/en-ru.ru.e4bc73ef-62c716fb-60995054-74722d776562/https/www.baeldung.com/cs/gradient-descent-logistic-regression
         # TODO убрать циклы
-        X_batch = X_batch.toarray()
-        for j in range(self.w.shape[0]):
+        print(f"Log self.w.shape {self.w.shape} dw {dw.shape}")
+        print(f"Log len(self.w) {len(self.w)} dw {len(dw)}")
+        # + 1 берется из-за того что длина вектора X[i] меньше чем длина вектора весов, возможно пересчитываются
+        # только свободные члены, а w[0] не изменяется
+        X_batch = LogisticRegression.append_biases(X_batch).toarray()
+        for j in range(len(self.w[:-1])):
             for i in range(len(y_batch)):
-                dw[j] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j]
+                dw[j+1] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j]
+            dw[j+1] = dw[j+1] / len(y_batch)  # Усреднение
             print(f"Log long cycle iteration j = {j} dw[j] = {dw[j]}")
 
         print(f"Log loss type dw {type(dw)}  {dw.shape}")

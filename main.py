@@ -25,10 +25,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, random
 X_train_sample = X_train[:10]   #
 y_train_sample = y_train[:10]
 clf = LogisticRegression()
-clf.w = np.random.randn(X_train_sample.shape[1]+2) * 2   # + 2 потому что append_biases увеличивает кол-во и3мерений на 1
+# + 2 потому что append_biases увеличивает кол-во измерений на 1, а весов итак нужно на 1 больше из-за свободного члена
+clf.w = np.random.randn(X_train_sample.shape[1]+2) * 2
 print("Main STEР1")
 print(f"clf.w.shape {clf.w.shape} X_train_sample.shape[1] {X_train_sample.shape[1]}")
-loss, grad = clf.loss(LogisticRegression.append_biases(X_train_sample), y_train_sample, 0.0)
+loss, grad = clf.loss(X_train_sample, y_train_sample, 0.0)
 print(f"Main STEР2 {loss} \n type(grad) {type(grad)} {grad}")
 #f = lambda w: clf.loss(LogisticRegression.append_biases(X_train_sample), y_train_sample, 0.0)[0]
 #grad_numerical = grad_check_sparse(f, clf.w, grad, 10)
