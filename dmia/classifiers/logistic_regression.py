@@ -2,6 +2,7 @@ import numpy as np
 from scipy import sparse
 from scipy.special import expit
 
+
 class LogisticRegression:
     def __init__(self):
         self.w = None
@@ -26,7 +27,7 @@ class LogisticRegression:
         A list containing the value of the loss function at each training iteration.
         """
         # Add a column of ones to X for the bias sake.
-        X = LogisticRegression.append_biases(X)
+        # X = LogisticRegression.append_biases(X)  bias term прибавляется при вызове loss
         num_train, dim = X.shape
         print(f"LOG num_train {num_train} dim {dim}")
         if self.w is None:
@@ -47,7 +48,7 @@ class LogisticRegression:
             # Hint: Use np.random.choice to generate indices. Sampling with         #
             # replacement is faster than sampling without replacement.              #
             #########################################################################
-            print(f"LOG TRAIN STEP 1")
+            print(f"LOG TRAIN STEP {it}")
             indexes = np.random.choice(num_train, batch_size)
             X_batch = X[indexes]
             y_batch = y[indexes]
@@ -64,7 +65,8 @@ class LogisticRegression:
             # TODO:                                                                 #
             # Update the weights using the gradient and the learning rate.          #
             #########################################################################
-
+            print(f"type(learning_rate) {type(learning_rate)} type(gradW) {type(gradW)}")
+            self.w = self.w - learning_rate * gradW
 
             #########################################################################
             #                       END OF YOUR CODE                                #
@@ -76,7 +78,6 @@ class LogisticRegression:
         return self
 
     def calculate_sigmoid(self, Xi):
-       # print(f"Log calculate_sigmoid {Xi.shape} {self.w[1:].shape}")
         return expit(self.w[0] + np.sum(self.w[1:] * Xi))
 
     def calculate_negative_prob(self, prob):
@@ -92,9 +93,6 @@ class LogisticRegression:
             return 1 - variants[0]
 
     def calculate_dw(self, Xi, Yi):
-        #print(f"Log calculate_dw type y_batch {type(y_batch)}\n "
-        #      f"\n  type y_predict {type(y_predict)}"
-        #      f" type w {type(w)}")
         return np.sum(Yi - self.calculate_sigmoid(Xi) * Xi)
 
     def predict_proba(self, X, append_bias=False):
@@ -117,8 +115,6 @@ class LogisticRegression:
         # Implement this method. Store the probabilities of classes in y_proba.   #
         # Hint: It might be helpful to use np.vstack and np.sum                   #
         ###########################################################################
-
-
 
         ###########################################################################
         #                           END OF YOUR CODE                              #
@@ -174,11 +170,11 @@ class LogisticRegression:
         print(f"Log after predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
+        loss += reg * np.linalg.norm(self.w)
         # Add regularization to the loss and gradient.
-        # ругуляризация https://craftappmobile.com/l1-%D0%B8-l2-%D1%80%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D0%B4%D0%BB%D1%8F-%D0%BB%D0%BE%D0%B3%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B9-%D1%80/?ysclid=l5cefgf0pn83923261
 
         print(f"X_batch shape {X_batch.shape} \n y_batch shape {y_batch.shape}")
-        #dw = np.array([self.calculate_dw(X_batch, y_batch) for i in range(X_batch.shape[1])])
+        # dw = np.array([self.calculate_dw(X_batch, y_batch) for i in range(X_batch.shape[1])])
         # https://translated.turbopages.org/proxy_u/en-ru.ru.e4bc73ef-62c716fb-60995054-74722d776562/https/www.baeldung.com/cs/gradient-descent-logistic-regression
         # TODO убрать циклы
         print(f"Log self.w.shape {self.w.shape} dw {dw.shape}")
@@ -188,14 +184,11 @@ class LogisticRegression:
         X_batch = LogisticRegression.append_biases(X_batch).toarray()
         for j in range(len(self.w[:-1])):
             for i in range(len(y_batch)):
-                dw[j+1] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j]
-            dw[j+1] = dw[j+1] / len(y_batch)  # Усреднение
-            print(f"Log long cycle iteration j = {j} dw[j] = {dw[j]}")
-
-        print(f"Log loss type dw {type(dw)}  {dw.shape}")
+                L1 = reg * np.sign(self.w[j])
+                dw[j + 1] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j] + L1
+            dw[j + 1] = dw[j + 1] / len(y_batch)  # Усреднение и регуляризация типа L1
 
         # Note that you have to exclude bias term in regularization.
-
 
         return loss, dw
 
