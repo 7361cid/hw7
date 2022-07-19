@@ -83,14 +83,11 @@ class LogisticRegression:
     def calculate_negative_prob(self, prob):
         return [prob, 1 - prob]
 
-    def chouse_prob(self, variants):
-        """
-        Должно во3вращать класс или вероятность??????
-        """
+    def chouse_class(self, variants):
         if variants[0] >= variants[1]:
-            return variants[0]
+            return 0
         else:
-            return 1 - variants[0]
+            return 1
 
     def calculate_dw(self, Xi, Yi):
         return np.sum(Yi - self.calculate_sigmoid(Xi) * Xi)
@@ -142,7 +139,9 @@ class LogisticRegression:
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
         y_proba = self.predict_proba(X, append_bias=True)
-        y_pred = np.array(list(map(self.chouse_prob, y_proba)))
+        print(f"Log y_proba {y_proba}")
+        y_pred = np.array(list(map(self.chouse_class, y_proba)))
+        print(f"Log y_pred {y_pred}")
         ###########################################################################
         #                           END OF YOUR CODE                              #
         ###########################################################################
@@ -166,7 +165,9 @@ class LogisticRegression:
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
         print(f"Log Before predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
-        y_predict = self.predict(X_batch)
+        X_batch = LogisticRegression.append_biases(X_batch)
+        X_batch = X_batch.toarray()
+        y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
         print(f"Log after predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
@@ -181,7 +182,7 @@ class LogisticRegression:
         print(f"Log len(self.w) {len(self.w)} dw {len(dw)}")
         # + 1 берется из-за того что длина вектора X[i] меньше чем длина вектора весов, возможно пересчитываются
         # только свободные члены, а w[0] не изменяется
-        X_batch = LogisticRegression.append_biases(X_batch).toarray()
+
         for j in range(len(self.w[:-1])):
             for i in range(len(y_batch)):
                 L1 = reg * np.sign(self.w[j])
