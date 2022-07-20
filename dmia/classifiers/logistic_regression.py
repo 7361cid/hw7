@@ -78,7 +78,7 @@ class LogisticRegression:
         return self
 
     def calculate_sigmoid(self, Xi):
-        return expit(self.w[0] + np.sum(self.w[1:] * Xi))
+        return expit(np.sum(self.w * Xi))
 
     def calculate_negative_prob(self, prob):
         return [prob, 1 - prob]
@@ -166,12 +166,12 @@ class LogisticRegression:
         # Note that the same thing must be done with gradient.
         print(f"Log Before predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         X_batch = LogisticRegression.append_biases(X_batch)
-        X_batch = X_batch.toarray()
-        y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
+        x_array = X_batch.toarray()
+        y_predict = np.array(list(map(self.calculate_sigmoid, x_array)))
         print(f"Log after predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
-        loss += reg * np.linalg.norm(self.w)
+        loss += reg * np.linalg.norm(self.w)  # Добавление регуляризации
         # Add regularization to the loss and gradient.
 
         print(f"X_batch shape {X_batch.shape} \n y_batch shape {y_batch.shape}")
@@ -179,15 +179,23 @@ class LogisticRegression:
         # https://translated.turbopages.org/proxy_u/en-ru.ru.e4bc73ef-62c716fb-60995054-74722d776562/https/www.baeldung.com/cs/gradient-descent-logistic-regression
         # TODO убрать циклы
         print(f"Log self.w.shape {self.w.shape} dw {dw.shape}")
-        print(f"Log len(self.w) {len(self.w)} dw {len(dw)}")
-        # + 1 берется из-за того что длина вектора X[i] меньше чем длина вектора весов, возможно пересчитываются
-        # только свободные члены, а w[0] не изменяется
-
-        for j in range(len(self.w[:-1])):
-            for i in range(len(y_batch)):
-                L1 = reg * np.sign(self.w[j])
-                dw[j + 1] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j] + L1
-            dw[j + 1] = dw[j + 1] / len(y_batch)  # Усреднение и регуляризация типа L1
+        print(f"Log len(self.w) {len(self.w)} dw {len(dw)}  {len(x_array[0])}")
+        # возможно ниже нужно использовать y_predict а не y_batch
+        print(f"Log type(y_predict) {type(y_predict)} type(y_batch) {type(y_batch)}  type(x_array) {type(x_array)}")
+        print(f"Log y_predict.shape {y_predict.shape} y_batch.shape {y_batch.shape}  x_array.shape {x_array.shape}")
+        tmp = y_predict * (y_predict - y_batch)   # TODO регуляризация
+        tmp = tmp[:, np.newaxis]
+        tmp = tmp * x_array
+        tmp = tmp.mean(axis=0)
+        print(f"Log tmp {tmp} {type(tmp)} {tmp.shape}")
+        dw = tmp
+        print(f"Log tmp {tmp} {type(tmp)} {tmp.shape}")
+        print(f"Log tmp.shape {tmp.shape} dw.shape {dw.shape}")
+       # for j in range(len(self.w[:-1])):
+       #     for i in range(len(y_batch)):
+       #         L1 = reg * np.sign(self.w[j])
+       #         dw[j + 1] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j] + L1
+       #     dw[j + 1] = dw[j + 1] / len(y_batch)  # Усреднение и регуляризация типа L1
 
         # Note that you have to exclude bias term in regularization.
 

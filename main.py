@@ -22,11 +22,11 @@ X = tfidfed
 y = train_df.Prediction.values
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, random_state=42)
 
-X_train_sample = X_train[:10]   #
+X_train_sample = X_train[:10]
 y_train_sample = y_train[:10]
 clf = LogisticRegression()
 # + 2 потому что append_biases увеличивает кол-во измерений на 1, а весов итак нужно на 1 больше из-за свободного члена
-clf.w = np.random.randn(X_train_sample.shape[1]+2) * 2
+clf.w = np.random.randn(X_train_sample.shape[1]+1) * 2
 print("Main STEР1")
 loss, grad = clf.loss(X_train_sample, y_train_sample, 0.0)
 print(f"Main STEР2 {loss} \n type(grad) {type(grad)} {grad}")
