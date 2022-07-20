@@ -65,8 +65,8 @@ class LogisticRegression:
             # TODO:                                                                 #
             # Update the weights using the gradient and the learning rate.          #
             #########################################################################
-            print(f"type(learning_rate) {type(learning_rate)} type(gradW) {type(gradW)}")
-            self.w = self.w - learning_rate * gradW
+            print(f"type(learning_rate) {learning_rate} \n {type(learning_rate)} type(gradW) {type(gradW)}")
+            self.w = self.w - float(learning_rate) * gradW
 
             #########################################################################
             #                       END OF YOUR CODE                                #
@@ -78,7 +78,8 @@ class LogisticRegression:
         return self
 
     def calculate_sigmoid(self, Xi):
-        return expit(np.sum(self.w * Xi))
+        print(f"Log calculate_sigmoid {self.w.shape} --- {Xi.shape}")
+        return expit(np.sum(self.w * Xi.toarray()))
 
     def calculate_negative_prob(self, prob):
         return [prob, 1 - prob]
@@ -115,8 +116,9 @@ class LogisticRegression:
 
         ###########################################################################
         #                           END OF YOUR CODE                              #
-        array_X = X.toarray()
-        probs = list(map(self.calculate_sigmoid, array_X))
+        print(f"LOG SIZE trouble {X.shape}")
+        # array_X = X.toarray()
+        probs = list(map(self.calculate_sigmoid, X))
         y_proba = np.array(list(map(self.calculate_negative_prob, probs)))
         ###########################################################################
         return y_proba
@@ -166,8 +168,8 @@ class LogisticRegression:
         # Note that the same thing must be done with gradient.
         print(f"Log Before predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         X_batch = LogisticRegression.append_biases(X_batch)
+        y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
         x_array = X_batch.toarray()
-        y_predict = np.array(list(map(self.calculate_sigmoid, x_array)))
         print(f"Log after predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
@@ -183,21 +185,15 @@ class LogisticRegression:
         # возможно ниже нужно использовать y_predict а не y_batch
         print(f"Log type(y_predict) {type(y_predict)} type(y_batch) {type(y_batch)}  type(x_array) {type(x_array)}")
         print(f"Log y_predict.shape {y_predict.shape} y_batch.shape {y_batch.shape}  x_array.shape {x_array.shape}")
-        tmp = y_predict * (y_predict - y_batch)   # TODO регуляризация
+        tmp = y_predict * (y_predict - y_batch)
         tmp = tmp[:, np.newaxis]
         tmp = tmp * x_array
         tmp = tmp.mean(axis=0)
+        tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
         print(f"Log tmp {tmp} {type(tmp)} {tmp.shape}")
         dw = tmp
         print(f"Log tmp {tmp} {type(tmp)} {tmp.shape}")
         print(f"Log tmp.shape {tmp.shape} dw.shape {dw.shape}")
-       # for j in range(len(self.w[:-1])):
-       #     for i in range(len(y_batch)):
-       #         L1 = reg * np.sign(self.w[j])
-       #         dw[j + 1] += y_batch[i] - self.calculate_sigmoid(X_batch[i]) * X_batch[i][j] + L1
-       #     dw[j + 1] = dw[j + 1] / len(y_batch)  # Усреднение и регуляризация типа L1
-
-        # Note that you have to exclude bias term in regularization.
 
         return loss, dw
 
