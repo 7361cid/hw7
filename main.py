@@ -7,6 +7,7 @@ import seaborn as sns; sns.set()
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn import linear_model
 
 from dmia.gradient_check import *
 from dmia.classifiers.logistic_regression import LogisticRegression
@@ -34,6 +35,8 @@ clf.w = np.random.randn(X_train_sample.shape[1]+1) * 2
 clf.train(X_train, y_train, verbose=True)
 print("Train f1-score = %.3f" % accuracy_score(y_train, clf.predict(X_train)))
 print("Test f1-score = %.3f" % accuracy_score(y_test, clf.predict(X_test)))
-print(y_train)
-print(clf.predict(X_train))
-print(f"{len(y_train)} --- {len(clf.predict(X_train))}")
+
+clf = linear_model.SGDClassifier(max_iter=2000, random_state=42, loss="log_loss", penalty="l2", alpha=1e-3, eta0=1.0, learning_rate="constant")
+clf.fit(X_train, y_train)
+print("Train accuracy = %.3f" % accuracy_score(y_train, clf.predict(X_train)))
+print("Test accuracy = %.3f" % accuracy_score(y_test, clf.predict(X_test)))
