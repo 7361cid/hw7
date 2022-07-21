@@ -29,12 +29,13 @@ class LogisticRegression:
         # Add a column of ones to X for the bias sake.
         # X = LogisticRegression.append_biases(X)  bias term прибавляется при вызове loss
         num_train, dim = X.shape
-        print(f"LOG num_train {num_train} dim {dim}")
         if self.w is None:
             # lazily initialize weights
             self.w = np.random.randn(dim) * 0.01
 
         # Run stochastic gradient descent to optimize W
+        min_loss = 99999
+        best_w = self.w
         self.loss_history = []
         for it in range(num_iters):
             #########################################################################
@@ -48,11 +49,9 @@ class LogisticRegression:
             # Hint: Use np.random.choice to generate indices. Sampling with         #
             # replacement is faster than sampling without replacement.              #
             #########################################################################
-            print(f"LOG TRAIN STEP {it}")
             indexes = np.random.choice(num_train, batch_size)
             X_batch = X[indexes]
             y_batch = y[indexes]
-            print(f"LOG X_batch.shape {X_batch.shape} ---- y_batch.shape  {y_batch.shape}")
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
@@ -65,20 +64,22 @@ class LogisticRegression:
             # TODO:                                                                 #
             # Update the weights using the gradient and the learning rate.          #
             #########################################################################
-            print(f"type(learning_rate) {learning_rate} \n {type(learning_rate)} type(gradW) {type(gradW)}")
-            self.w = self.w - float(learning_rate) * gradW
-
+            self.w = self.w + float(learning_rate) * gradW
+            if loss < min_loss:
+                print(f'update weights loss {loss}')
+                min_loss = loss
+                best_w = self.w
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
 
-            if verbose and it % 100 == 0:
+            if verbose and it % 1000 == 0:
                 print('iteration %d / %d: loss %f' % (it, num_iters, loss))
+        self.w = best_w
 
         return self
 
     def calculate_sigmoid(self, Xi):
-        print(f"Log calculate_sigmoid {self.w.shape} --- {Xi.shape}")
         return expit(np.sum(self.w * Xi.toarray()))
 
     def calculate_negative_prob(self, prob):
@@ -89,9 +90,6 @@ class LogisticRegression:
             return 0
         else:
             return 1
-
-    def calculate_dw(self, Xi, Yi):
-        return np.sum(Yi - self.calculate_sigmoid(Xi) * Xi)
 
     def predict_proba(self, X, append_bias=False):
         """
@@ -116,7 +114,6 @@ class LogisticRegression:
 
         ###########################################################################
         #                           END OF YOUR CODE                              #
-        print(f"LOG SIZE trouble {X.shape}")
         # array_X = X.toarray()
         probs = list(map(self.calculate_sigmoid, X))
         y_proba = np.array(list(map(self.calculate_negative_prob, probs)))
@@ -141,9 +138,7 @@ class LogisticRegression:
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
         y_proba = self.predict_proba(X, append_bias=True)
-        print(f"Log y_proba {y_proba}")
         y_pred = np.array(list(map(self.chouse_class, y_proba)))
-        print(f"Log y_pred {y_pred}")
         ###########################################################################
         #                           END OF YOUR CODE                              #
         ###########################################################################
@@ -166,34 +161,22 @@ class LogisticRegression:
         # Right now the loss is a sum over all training examples, but we want it
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
-        print(f"Log Before predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         X_batch = LogisticRegression.append_biases(X_batch)
         y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
         x_array = X_batch.toarray()
-        print(f"Log after predict X_batch shape {X_batch.shape} self.w.shape {self.w.shape}")
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
         loss += reg * np.linalg.norm(self.w)  # Добавление регуляризации
         # Add regularization to the loss and gradient.
 
-        print(f"X_batch shape {X_batch.shape} \n y_batch shape {y_batch.shape}")
-        # dw = np.array([self.calculate_dw(X_batch, y_batch) for i in range(X_batch.shape[1])])
-        # https://translated.turbopages.org/proxy_u/en-ru.ru.e4bc73ef-62c716fb-60995054-74722d776562/https/www.baeldung.com/cs/gradient-descent-logistic-regression
-        # TODO убрать циклы
-        print(f"Log self.w.shape {self.w.shape} dw {dw.shape}")
-        print(f"Log len(self.w) {len(self.w)} dw {len(dw)}  {len(x_array[0])}")
         # возможно ниже нужно использовать y_predict а не y_batch
-        print(f"Log type(y_predict) {type(y_predict)} type(y_batch) {type(y_batch)}  type(x_array) {type(x_array)}")
-        print(f"Log y_predict.shape {y_predict.shape} y_batch.shape {y_batch.shape}  x_array.shape {x_array.shape}")
+
         tmp = y_predict * (y_predict - y_batch)
         tmp = tmp[:, np.newaxis]
         tmp = tmp * x_array
         tmp = tmp.mean(axis=0)
         tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
-        print(f"Log tmp {tmp} {type(tmp)} {tmp.shape}")
         dw = tmp
-        print(f"Log tmp {tmp} {type(tmp)} {tmp.shape}")
-        print(f"Log tmp.shape {tmp.shape} dw.shape {dw.shape}")
 
         return loss, dw
 

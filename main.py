@@ -25,13 +25,15 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, random
 X_train_sample = X_train[:10]
 y_train_sample = y_train[:10]
 clf = LogisticRegression()
-# + 2 потому что append_biases увеличивает кол-во измерений на 1, а весов итак нужно на 1 больше из-за свободного члена
 clf.w = np.random.randn(X_train_sample.shape[1]+1) * 2
 
 #loss, grad = clf.loss(X_train_sample, y_train_sample, 0.0)
 #f = lambda w: clf.loss(X_train_sample, y_train_sample, 0.0)[0]
 #grad_numerical = grad_check_sparse(f, clf.w, grad, 10)
 
-clf.train(X_train, y_train)
+clf.train(X_train, y_train, verbose=True)
 print("Train f1-score = %.3f" % accuracy_score(y_train, clf.predict(X_train)))
 print("Test f1-score = %.3f" % accuracy_score(y_test, clf.predict(X_test)))
+print(y_train)
+print(clf.predict(X_train))
+print(f"{len(y_train)} --- {len(clf.predict(X_train))}")
