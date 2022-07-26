@@ -33,10 +33,11 @@ clf.w = np.random.randn(X_train_sample.shape[1]+1) * 2
 #grad_numerical = grad_check_sparse(f, clf.w, grad, 10)
 
 clf.train(X_train, y_train, verbose=True)
+print("Train finish")
 print("Train f1-score = %.3f" % accuracy_score(y_train, clf.predict(X_train)))
 print("Test f1-score = %.3f" % accuracy_score(y_test, clf.predict(X_test)))
 
-clf = linear_model.SGDClassifier(max_iter=2000, random_state=42, loss="log_loss", penalty="l2", alpha=1e-3, eta0=1.0, learning_rate="constant")
-clf.fit(X_train, y_train)
+#clf = linear_model.SGDClassifier(max_iter=2000, random_state=42, loss="log_loss", penalty="l2", alpha=1e-3, eta0=1.0, learning_rate="constant")
+#clf.fit(X_train, y_train)
 print("Train accuracy = %.3f" % accuracy_score(y_train, clf.predict(X_train)))
 print("Test accuracy = %.3f" % accuracy_score(y_test, clf.predict(X_test)))

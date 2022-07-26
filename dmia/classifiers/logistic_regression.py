@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from scipy import sparse
 from scipy.special import expit
 
@@ -8,7 +9,7 @@ class LogisticRegression:
         self.w = None
         self.loss_history = None
 
-    def train(self, X, y, learning_rate=1e-3, reg=1e-5, num_iters=100,
+    def train(self, X, y, learning_rate=1e-3, reg=1e-5, num_iters=10,
               batch_size=200, verbose=False):
         """
         Train this classifier using stochastic gradient descent.
@@ -64,7 +65,7 @@ class LogisticRegression:
             # TODO:                                                                 #
             # Update the weights using the gradient and the learning rate.          #
             #########################################################################
-            self.w = self.w + float(learning_rate) * gradW
+            self.w = self.w - float(learning_rate) * gradW
             if loss < min_loss:
                 print(f'update weights loss {loss}')
                 min_loss = loss
@@ -73,13 +74,16 @@ class LogisticRegression:
             #                       END OF YOUR CODE                                #
             #########################################################################
 
-            if verbose and it % 1000 == 0:
+            if verbose and it % 1 == 0:
                 print('iteration %d / %d: loss %f' % (it, num_iters, loss))
         self.w = best_w
 
         return self
 
     def calculate_sigmoid(self, Xi):
+        r = random.randint(1, 1000)
+        if r == 123:
+            print("calculate_sigmoid")
         return expit(np.sum(self.w * Xi.toarray()))
 
     def calculate_negative_prob(self, prob):
@@ -121,6 +125,7 @@ class LogisticRegression:
         return y_proba
 
     def predict(self, X):
+        print(f"predict {X.shape}")
         """
         Use the ```predict_proba``` method to predict labels for data points.
 
@@ -171,11 +176,14 @@ class LogisticRegression:
 
         # возможно ниже нужно использовать y_predict а не y_batch
 
-        tmp = y_predict * (y_predict - y_batch)
+       # tmp = y_predict * (y_predict - y_batch)
+       # tmp = tmp[:, np.newaxis]
+       # tmp = tmp * x_array
+       # tmp = tmp.mean(axis=0)
+       # tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
+        tmp = y_predict - y_batch
         tmp = tmp[:, np.newaxis]
-        tmp = tmp * x_array
-        tmp = tmp.mean(axis=0)
-        tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
+        tmp = tmp * x_array / y_batch.shape[0]
         dw = tmp
 
         return loss, dw
