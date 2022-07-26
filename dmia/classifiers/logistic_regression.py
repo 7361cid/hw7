@@ -174,16 +174,19 @@ class LogisticRegression:
         loss += reg * np.linalg.norm(self.w)  # Добавление регуляризации
         # Add regularization to the loss and gradient.
 
-        # возможно ниже нужно использовать y_predict а не y_batch
 
+       # способ 1
        # tmp = y_predict * (y_predict - y_batch)
        # tmp = tmp[:, np.newaxis]
        # tmp = tmp * x_array
        # tmp = tmp.mean(axis=0)
        # tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
+
+        # способ 2
         tmp = y_predict - y_batch
         tmp = tmp[:, np.newaxis]
         tmp = tmp * x_array / y_batch.shape[0]
+        tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
         dw = tmp
 
         return loss, dw
