@@ -183,10 +183,21 @@ class LogisticRegression:
        # tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
 
         # способ 2
-        tmp = y_predict - y_batch
+       # tmp = y_predict - y_batch
+       # tmp = tmp[:, np.newaxis]
+       # tmp = tmp * x_array / y_batch.shape[0]
+       # tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
+       # dw = tmp
+
+        # способ 3
+        k = random.randint(0, y_batch.shape[0])
+        Xk = X_batch[k]
+        y_predict_k = ones * self.calculate_sigmoid(Xk)
+        tmp = y_predict_k - y_batch
         tmp = tmp[:, np.newaxis]
-        tmp = tmp * x_array / y_batch.shape[0]
-        tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
+        Xk_array = Xk.toarray()
+        tmp = tmp * Xk_array / y_batch.shape[0]
+
         dw = tmp
 
         return loss, dw
