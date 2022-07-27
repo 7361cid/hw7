@@ -9,7 +9,7 @@ class LogisticRegression:
         self.w = None
         self.loss_history = None
 
-    def train(self, X, y, learning_rate=1e-3, reg=1e-5, num_iters=10,
+    def train(self, X, y, learning_rate=100, reg=1e-5, num_iters=10,
               batch_size=200, verbose=False):
         """
         Train this classifier using stochastic gradient descent.
@@ -32,7 +32,7 @@ class LogisticRegression:
         num_train, dim = X.shape
         if self.w is None:
             # lazily initialize weights
-            self.w = np.random.randn(dim) * 0.01
+            self.w = np.random.randn(dim + 1) * 0.01
 
         # Run stochastic gradient descent to optimize W
         min_loss = 99999
@@ -67,7 +67,6 @@ class LogisticRegression:
             #########################################################################
             self.w = self.w - float(learning_rate) * gradW
             if loss < min_loss:
-                print(f'update weights loss {loss}')
                 min_loss = loss
                 best_w = self.w
             #########################################################################
@@ -168,36 +167,26 @@ class LogisticRegression:
         # Note that the same thing must be done with gradient.
         X_batch = LogisticRegression.append_biases(X_batch)
         y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
-        x_array = X_batch.toarray()
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
+
+        for i in range(y_predict.shape[0]):  # чтобы избежать ошибок при подсчете логарифма
+            if y_predict[i] == 1:
+                y_predict[i] = 0.999
+            if y_predict[i] == 0:
+                y_predict[i] = 0.001
         loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
         loss += reg * np.linalg.norm(self.w)  # Добавление регуляризации
         # Add regularization to the loss and gradient.
 
-
-       # способ 1
-       # tmp = y_predict * (y_predict - y_batch)
-       # tmp = tmp[:, np.newaxis]
-       # tmp = tmp * x_array
-       # tmp = tmp.mean(axis=0)
-       # tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
-
-        # способ 2
-       # tmp = y_predict - y_batch
-       # tmp = tmp[:, np.newaxis]
-       # tmp = tmp * x_array / y_batch.shape[0]
-       # tmp += reg * np.array(list(map(np.sign, self.w)))  # регуляризация
-       # dw = tmp
-
-        # способ 3
-        k = random.randint(0, y_batch.shape[0])
+        k = random.randint(0, y_batch.shape[0] - 1)
+        print(f"k {k}  X_batch shape {X_batch.shape} ")
         Xk = X_batch[k]
-        y_predict_k = ones * self.calculate_sigmoid(Xk)
+        Xk_array = Xk.toarray()
+        y_predict_k = np.sum(self.w * Xk_array)
         tmp = y_predict_k - y_batch
         tmp = tmp[:, np.newaxis]
-        Xk_array = Xk.toarray()
         tmp = tmp * Xk_array / y_batch.shape[0]
-
+        tmp += reg * np.array(list(map(np.sign, self.w)))
         dw = tmp
 
         return loss, dw
