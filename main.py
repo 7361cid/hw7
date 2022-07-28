@@ -17,14 +17,16 @@ X = vectorizer.fit_transform(review_summaries)
 y = train_df.Prediction.values
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, random_state=42)
 clf = LogisticRegression()
-clf.train(X_train, y_train, verbose=True, learning_rate=1.0, num_iters=1000, batch_size=256, reg=1e-3)
+clf.train(X_train, y_train, verbose=True, learning_rate=1.0, num_iters=100, batch_size=256, reg=1e-3)
 print("Train finish")
 print("Train accuracy = %.3f" % accuracy_score(y_train, clf.predict(X_train)))
 print("Test accuracy = %.3f" % accuracy_score(y_test, clf.predict(X_test)))
 # Получите индексы фичей
-pos_features = np.argsort(clf.w)[-5:]
-neg_features = np.argsort(clf.w)[:5]
+pos_features = np.argsort(clf.w)[-1][:5]
+neg_features = np.argsort(clf.w)[1][-5:]
 # Выведите слова
 fnames = vectorizer.get_feature_names()
-print([fnames[p] for p in pos_features])
-print([fnames[n] for n in neg_features])
+print(f"pos_features {pos_features}  {pos_features.shape}")
+print(f"neg_features {neg_features}  {neg_features.shape}")
+print([fnames[p-1] for p in pos_features])
+print([fnames[n-1] for n in neg_features])

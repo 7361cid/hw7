@@ -27,12 +27,11 @@ class LogisticRegression:
         Outputs:
         A list containing the value of the loss function at each training iteration.
         """
-        # Add a column of ones to X for the bias sake.
-        # X = LogisticRegression.append_biases(X)  bias term прибавляется при вызове loss
+        X = LogisticRegression.append_biases(X)  # Add a column of ones to X for the bias sake.
         num_train, dim = X.shape
         if self.w is None:
             # lazily initialize weights
-            self.w = np.random.randn(dim + 1) * 0.01
+            self.w = np.random.randn(dim) * 0.01
 
         # Run stochastic gradient descent to optimize W
         min_loss = 99999
@@ -66,7 +65,7 @@ class LogisticRegression:
             # Update the weights using the gradient and the learning rate.          #
             #########################################################################
             self.w = self.w - float(learning_rate) * gradW
-            if loss < min_loss:
+            if loss < min_loss:   # Выбор лучших весов
                 min_loss = loss
                 best_w = self.w
             #########################################################################
@@ -165,7 +164,6 @@ class LogisticRegression:
         # Right now the loss is a sum over all training examples, but we want it
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
-        X_batch = LogisticRegression.append_biases(X_batch)
         y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
         ones = np.array(list(1 for i in range(y_predict.shape[0])))
 
@@ -182,12 +180,10 @@ class LogisticRegression:
         print(f"k {k}  X_batch shape {X_batch.shape} ")
         Xk = X_batch[k]
         Xk_array = Xk.toarray()
-        y_predict_k = np.sum(self.w * Xk_array)
-        tmp = y_predict_k - y_batch
-        tmp = tmp[:, np.newaxis]
-        tmp = tmp * Xk_array / y_batch.shape[0]
-        tmp += reg * np.array(list(map(np.sign, self.w)))
-        dw = tmp
+        dw = np.sum(self.w * Xk_array) - y_batch
+        dw = dw[:, np.newaxis]
+        dw = dw * Xk_array / y_batch.shape[0]
+        dw += reg * np.array(list(map(np.sign, self.w)))
 
         return loss, dw
 
