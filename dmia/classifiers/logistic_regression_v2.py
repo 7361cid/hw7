@@ -31,11 +31,8 @@ class LogisticRegression:
         if self.w is None:
             # lazily initialize weights
             self.w = np.random.randn(dim) * 0.01
-
-        # Run stochastic gradient descent to optimize W
-        min_loss = 99999
-        best_w = self.w
         self.loss_history = []
+        # Run stochastic gradient descent to optimize W
         for it in range(num_iters):
             #########################################################################
             # TODO:                                                                 #
@@ -57,24 +54,24 @@ class LogisticRegression:
 
             # evaluate loss and gradient
             loss, gradW = self.loss(X_batch, y_batch, reg)
+            print(f"Log train {loss} --- {gradW}")
             self.loss_history.append(loss)
             # perform parameter update
             #########################################################################
             # TODO:                                                                 #
             # Update the weights using the gradient and the learning rate.          #
             #########################################################################
-            self.w = self.w - float(learning_rate) * gradW
-            if loss < min_loss:   # Выбор лучших весов
-                min_loss = loss
-                best_w = self.w
+            self.w -= learning_rate * gradW
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
 
             if verbose and it % 1 == 0:
                 print('iteration %d / %d: loss %f' % (it, num_iters, loss))
-        self.w = best_w
-
+        y_pred = X @ self.w > 0
+        print(f"Log y_pred {y_pred} \n {y_pred.shape}")
+        y_pred2 = X @ self.w
+        print(f"Log y_pred2 {y_pred2} \n {y_pred2.shape}")
         return self
 
     def sigma(self, z):
@@ -83,11 +80,21 @@ class LogisticRegression:
     def calculate_sigmoid(self, Xi):
         return self.sigma(np.sum(self.w * Xi.toarray()))
 
+    def grad(self, y, X):
+        n = y.shape[0]
+        X = X.toarray()
+        print(f"grad {X.shape} --- {y.shape} --- {self.w})")
+        return 1 / n * X.transpose() @ (self.sigma(X @ self.w) - y)
+
+    def L(self, y, X):
+        n = y.shape[0]
+        return -1 / (n) * np.sum(y * np.log(self.sigma(X @ self.w)) + (1 - y) * np.log(1 - self.sigma(X @ self.w)))
+
     def calculate_negative_prob(self, prob):
         return [prob, 1 - prob]
 
     def chouse_class(self, variants):
-        if variants[0] >= variants[1]:
+        if variants[0] >= 0.8:
             return 0
         else:
             return 1
@@ -164,25 +171,12 @@ class LogisticRegression:
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
         y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
-        ones = np.array(list(1 for i in range(y_predict.shape[0])))
 
-        for i in range(y_predict.shape[0]):  # чтобы избежать ошибок при подсчете логарифма
-            if y_predict[i] == 1:
-                y_predict[i] = 0.999
-            if y_predict[i] == 0:
-                y_predict[i] = 0.001
-        loss = np.mean(- (y_batch * np.log(y_predict) + (ones - y_batch) * np.log(ones - y_predict)))
-        loss += reg * np.linalg.norm(self.w)  # Добавление регуляризации
+        loss = self.L(y_batch, X_batch)
+        dw = self.grad(y_batch, X_batch)
+       # loss += reg * np.linalg.norm(self.w)  # Добавление регуляризации
         # Add regularization to the loss and gradient.
 
-        k = random.randint(0, y_batch.shape[0] - 1)
-        print(f"k {k}  X_batch shape {X_batch.shape} ")
-        Xk = X_batch[k]
-        Xk_array = Xk.toarray()
-        dw = np.sum(self.w * Xk_array) - y_batch
-        dw = dw[:, np.newaxis]
-        dw = dw * Xk_array / y_batch.shape[0]
-        dw += reg * np.array(list(map(np.sign, self.w)))
 
         return loss, dw
 
