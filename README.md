@@ -16,6 +16,9 @@ python main.py
 Рассчет функции потерь  (3)  
 ![alt text](log_loss.png)
 Рассчет весов при помощи стохастического градиентного спуска(4)
-![alt text](weight3.png)    
+![alt text](weight.png)    
 Регуляризация (сверху для функции потерь, снизу для коррекции весов)
 ![alt text](reg.png)  
+
+## Результат  
+![alt text](result.png)  
