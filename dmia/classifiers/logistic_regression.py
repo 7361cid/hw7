@@ -87,13 +87,6 @@ class LogisticRegression:
     def calculate_negative_prob(self, prob):
         return [prob, 1 - prob]
 
-    def chouse_class(self, variants):
-        if variants[0] > variants[1]:
-            return 1
-        else:
-            return 0
-
-
     def predict_proba(self, X, append_bias=False):
         """
         Use the trained weights of this linear classifier to predict probabilities for
@@ -118,9 +111,9 @@ class LogisticRegression:
         ###########################################################################
         #                           END OF YOUR CODE                              #
 
-        probs = self.sigma(X @ self.w)  # рассчет вероятностей
-        # вероятности в виде [prob_class_0, prob_class_1]
-        y_proba = np.array(list(map(self.calculate_negative_prob, probs)))
+        prob_class_1 = self.sigma(X @ self.w)  # рассчет вероятностей
+        prob_class_0 = 1 - prob_class_1
+        y_proba = np.vstack((prob_class_0, prob_class_1)).transpose()
         ###########################################################################
 
         return y_proba
@@ -143,7 +136,7 @@ class LogisticRegression:
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
         y_proba = self.predict_proba(X, append_bias=True)
-        y_pred = np.array(list(map(self.chouse_class, y_proba)))
+        y_pred = np.argmax(y_proba, axis=1)
         ###########################################################################
         #                           END OF YOUR CODE                              #
         ###########################################################################
@@ -166,13 +159,17 @@ class LogisticRegression:
         # Right now the loss is a sum over all training examples, but we want it
         # to be an average instead so we divide by num_train.
         # Note that the same thing must be done with gradient.
-        y_predict = np.array(list(map(self.calculate_sigmoid, X_batch)))
 
         loss = self.L(y_batch, X_batch)
-        loss += reg * np.linalg.norm(self.w) # Добавление регуляризации
+        loss += reg * np.linalg.norm(self.w)  # Добавление регуляризации
         dw = self.grad(y_batch, X_batch)
-        dw += reg * np.array(list(map(np.sign, self.w)))  # Добавление регуляризации
         # Add regularization to the loss and gradient.
+        num_train = len(y_batch)
+        num_features = X_batch.shape[1]
+        loss += (reg / (2.0 * num_train)) * np.dot(self.w[:num_features - 1], self.w[:num_features - 1])
+        dw_penalty = reg * self.w
+        dw_penalty[-1] = 0
+        dw += dw_penalty
 
         return loss, dw
 

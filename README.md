@@ -22,3 +22,5 @@ python main.py
 
 ## Результат  
 ![alt text](result.png)  
+## Кривые обучения  
+![alt text](result2.png)

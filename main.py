@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns; sns.set()
+import tqdm  # interactive progress bar
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -26,3 +28,19 @@ neg_features = np.argsort(clf.w)[-5:]
 fnames = vectorizer.get_feature_names_out()
 print([fnames[p-1] for p in pos_features])
 print([fnames[n-1] for n in neg_features])
+
+# построение графиков
+clf = LogisticRegression()
+train_scores = []
+test_scores = []
+num_iters = 1000
+
+for i in tqdm.trange(num_iters):
+    # Сделайте один шаг градиентного спуска с помощью num_iters=1
+    clf.train(X_train, y_train, learning_rate=1.0, num_iters=1, batch_size=256, reg=1e-3)
+    train_scores.append(accuracy_score(y_train, clf.predict(X_train)))
+    test_scores.append(accuracy_score(y_test, clf.predict(X_test)))
+
+plt.figure(figsize=(10,8))
+plt.plot(train_scores, 'r', test_scores, 'b')
+plt.show()
